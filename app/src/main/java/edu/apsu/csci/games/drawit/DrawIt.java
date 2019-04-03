@@ -1,15 +1,24 @@
 package edu.apsu.csci.games.drawit;
 
+import android.content.ContentResolver;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
+import android.provider.MediaStore;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.View;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 public class DrawIt extends View {
         private int currentWidth;
@@ -113,6 +122,29 @@ public class DrawIt extends View {
             setMeasuredDimension(width, height);
         }
 
+//    public void setImage(Uri uri){
+//            Drawable drawable = Drawable.createFromPath(uri.toString());
+//        setBackground(drawable);
+//            invalidate();
+//    }
 
+    public void setImage(String path){
+        InputStream inputStream;
+        Drawable drawable = Drawable.createFromPath(path);
+        setBackground(drawable);
+        invalidate();
+    }
+
+    public void setImage(ContentResolver cr, Uri uri)  {
+        Bitmap selectedImage = null;
+        try {
+            selectedImage = MediaStore.Images.Media.getBitmap(cr, uri);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        BitmapDrawable bitmapDrawable = new BitmapDrawable(getResources(), selectedImage);
+            setBackground(bitmapDrawable);
+            invalidate();
+    }
 
 }
