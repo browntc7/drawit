@@ -5,11 +5,13 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.SystemClock;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 
 public class MainActivity extends AppCompatActivity {
@@ -98,6 +100,30 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 setStrokeListener(v);
+            }
+        });
+
+        findViewById(R.id.event_circle_btn).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                DrawIt drawIt = findViewById(R.id.draw_canvas);
+                drawIt.setEvent(DrawIt.CIRCLE_EVENT);
+            }
+        });
+
+        findViewById(R.id.event_pencil_btn).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                DrawIt drawIt = findViewById(R.id.draw_canvas);
+                drawIt.setEvent(DrawIt.PENCIL_EVENT);
+            }
+        });
+
+        findViewById(R.id.event_sqaure_btn).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                DrawIt drawIt = findViewById(R.id.draw_canvas);
+                drawIt.setEvent(DrawIt.SQUARE_EVENT);
             }
         });
     }

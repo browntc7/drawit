@@ -7,12 +7,14 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.View;
@@ -23,15 +25,25 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DrawIt extends View {
+
+    public static final int PENCIL_EVENT = 0;
+    public static final int SQUARE_EVENT = 1;
+    public static final int CIRCLE_EVENT = 2;
+    public static final int DEFAULT_STROKE = 8;
+
     private int currentWidth;
     private int currentHeight;
+    private int currentEvent = PENCIL_EVENT;
     private int currentColor = Color.RED;
-    private int currentStrokeWidth = 10;
+    private int currentStrokeWidth = DEFAULT_STROKE;
     private Paint paint;
     private Path path;
+    private Rectangle rectangle;
+    //private Circle circle;
     private List<Path> paths = new ArrayList<>();
     private List<Integer> colors = new ArrayList<>();
     private List<Integer> strokes = new ArrayList<>();
+    private List<Rectangle> rectangles = new ArrayList<>();
 
     public DrawIt(Context context) {
         super(context);
@@ -68,6 +80,21 @@ public class DrawIt extends View {
             canvas.drawPath(paths.get(i), paint);
         }
 
+        Log.i("Rect size", Integer.toString(rectangles.size()));
+        for(int i = 0; i < rectangles.size(); i ++){
+            Rectangle rect = rectangles.get(i);
+            if (rect != null) {
+                paint.setColor(rect.getColor());
+                paint.setStrokeWidth(rect.getStroke());
+                if (rect.getType() == Rectangle.RECTANGLE) {
+                    canvas.drawRect(rect.getLeft(), rect.getTop(), rect.getRight(), rect.getBottom(), paint);
+                    Log.i("Type", Integer.toString(rectangle.getType()));
+                } else if (rect.getType() == Rectangle.CIRCLE) {
+                    canvas.drawOval(rect.getLeft(), rect.getTop(), rect.getRight(), rect.getBottom(), paint);
+                }
+            }
+        }
+
     }
 
     /**
@@ -79,14 +106,29 @@ public class DrawIt extends View {
             int action = event.getAction();
 
             if(action == MotionEvent.ACTION_DOWN) {
-                path.moveTo(event.getX(), event.getY());
+                if(currentEvent == PENCIL_EVENT) {
+                    path.moveTo(event.getX(), event.getY());
+                } else if (currentEvent == SQUARE_EVENT) {
+                    rectangle = new Rectangle(event.getY(), event.getX(), currentColor, Rectangle.RECTANGLE, currentStrokeWidth);
+                } else if (currentEvent == CIRCLE_EVENT){
+                    rectangle = new Rectangle(event.getY(), event.getX(), currentColor, Rectangle.CIRCLE, currentStrokeWidth);
+                }
             } else if (action == MotionEvent.ACTION_MOVE){
-                path.lineTo(event.getX(), event.getY());
-                invalidate();
+                if(currentEvent == PENCIL_EVENT) {
+                    path.lineTo(event.getX(), event.getY());
+                    invalidate();
+                } else  if (currentEvent == SQUARE_EVENT || currentEvent == CIRCLE_EVENT){
+                    Log.i("OnTouchEvent", "MOVE + Square/Circle");
+                    rectangle.setBottom(event.getY());
+                    rectangle.setRight(event.getX());
+                    invalidate();
+                }
+
             } else if (action == MotionEvent.ACTION_UP){
                 paths.add(path);
                 colors.add(currentColor);
                 strokes.add(currentStrokeWidth);
+                rectangles.add(rectangle);
                 invalidate();
             }
             return true;
@@ -158,14 +200,95 @@ public class DrawIt extends View {
     }
 
     public void setPaintColor(int color){
+        invalidate();
         currentColor = color;
         //paint.setColor(color);
         path = new Path();
+        //invalidate();
+//        if(currentEvent == SQUARE_EVENT){
+//            rectangle.setColor(color);
+//        }
     }
 
     public void setStroke(int stroke){
+        invalidate();
         currentStrokeWidth = stroke;
         path = new Path();
+        //invalidate();
     }
 
+    public void setEvent(int event){
+        currentEvent = event;
+    }
 }
+
+class Rectangle {
+
+    public static final int RECTANGLE = 0;
+    public static final int CIRCLE = 1;
+
+    private float top;
+    private float right;
+    private float left;
+    private float bottom;
+    private int color;
+    private int stroke;
+    private final int type;
+
+    Rectangle(float top, float left, int color, int type, int stroke){
+        this.top = top;
+        this.left = left;
+        this.color = color;
+        this.type = type;
+        this.stroke = stroke;
+    }
+
+    public float getTop() {
+        return top;
+    }
+
+    public void setTop(float top) {
+        this.top = top;
+    }
+
+    public float getRight() {
+        return right;
+    }
+
+    public void setRight(float right) {
+        this.right = right;
+    }
+
+    public float getLeft() {
+        return left;
+    }
+
+    public void setLeft(float left) {
+        this.left = left;
+    }
+
+    public float getBottom() {
+        return bottom;
+    }
+
+    public void setBottom(float bottom) {
+        this.bottom = bottom;
+    }
+
+    public int getColor() {
+        return color;
+    }
+
+    public void setColor(int color) {
+        this.color = color;
+    }
+
+    public int getType(){
+        return type;
+    }
+
+    public int getStroke(){
+        return stroke;
+    }
+}
+

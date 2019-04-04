@@ -21,7 +21,7 @@
             android:textSize="12sp" />
 
         <Button
-            android:id="@+id/button17"
+            android:id="@+id/event_pencil_btn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -29,7 +29,7 @@
             android:textSize="12sp" />
 
         <Button
-            android:id="@+id/button2"
+            android:id="@+id/event_sqaure_btn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -37,7 +37,7 @@
             android:textSize="12sp" />
 
         <Button
-            android:id="@+id/button3"
+            android:id="@+id/event_circle_btn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
