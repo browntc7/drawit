@@ -1,6 +1,8 @@
 package edu.apsu.csci.games.drawit;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -14,6 +16,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Button;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -22,6 +25,8 @@ public class MainActivity extends AppCompatActivity {
 
     private static final int PHOTO_INTENT = 1;
     private Uri imageUri;
+    private SharedPreferences preferences;
+    private static final String DRAW_KEY = "dKey";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -129,6 +134,17 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 DrawIt drawIt = findViewById(R.id.draw_canvas);
                 drawIt.setEvent(DrawIt.SQUARE_EVENT);
+            }
+        });
+
+        final Button save_button = findViewById(R.id.save_button);
+        findViewById(R.id.save_button).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                preferences = getSharedPreferences("preferences", Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = preferences.edit();
+                editor.putString(DRAW_KEY, save_button.getText().toString()).commit();
+
             }
         });
     }
