@@ -11,6 +11,8 @@ import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Bundle;
+import android.os.Parcelable;
 import android.provider.MediaStore;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
@@ -21,10 +23,12 @@ import android.view.View;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serializable;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DrawIt extends View {
+public class DrawIt extends View implements Serializable {
 
     public static final int PENCIL_EVENT = 0;
     public static final int SQUARE_EVENT = 1;
@@ -62,12 +66,13 @@ public class DrawIt extends View {
 
     private void setup(AttributeSet attrs) {
         paint = new Paint();
-        paint.setColor(currentColor); //default paint color
+        paint.setColor(currentColor);
         paint.setStyle(Paint.Style.STROKE);
         paint.setStrokeJoin(Paint.Join.ROUND);
         paint.setStrokeCap(Paint.Cap.ROUND);
         paint.setStrokeWidth(currentStrokeWidth);
         path = new Path();
+
     }
 
     @Override
@@ -88,7 +93,7 @@ public class DrawIt extends View {
                 paint.setStrokeWidth(rect.getStroke());
                 if (rect.getType() == Rectangle.RECTANGLE) {
                     canvas.drawRect(rect.getLeft(), rect.getTop(), rect.getRight(), rect.getBottom(), paint);
-                    Log.i("Type", Integer.toString(rectangle.getType()));
+                    Log.i("Type", Integer.toString(rect.getType()));
                 } else if (rect.getType() == Rectangle.CIRCLE) {
                     canvas.drawOval(rect.getLeft(), rect.getTop(), rect.getRight(), rect.getBottom(), paint);
                 }
@@ -107,6 +112,7 @@ public class DrawIt extends View {
 
             if(action == MotionEvent.ACTION_DOWN) {
                 if(currentEvent == PENCIL_EVENT) {
+                    path = new Path();
                     path.moveTo(event.getX(), event.getY());
                 } else if (currentEvent == SQUARE_EVENT) {
                     rectangle = new Rectangle(event.getY(), event.getX(), currentColor, Rectangle.RECTANGLE, currentStrokeWidth);
@@ -125,10 +131,14 @@ public class DrawIt extends View {
                 }
 
             } else if (action == MotionEvent.ACTION_UP){
-                paths.add(path);
+                if(currentEvent == PENCIL_EVENT) {
+                    paths.add(path);
+                } else if (currentEvent == SQUARE_EVENT || currentEvent == CIRCLE_EVENT){
+                    rectangles.add(rectangle);
+                }
                 colors.add(currentColor);
                 strokes.add(currentStrokeWidth);
-                rectangles.add(rectangle);
+
                 invalidate();
             }
             return true;
@@ -199,11 +209,15 @@ public class DrawIt extends View {
         invalidate();
     }
 
+    public void setImage (Drawable drawable){
+        setBackground(drawable);
+    }
+
     public void setPaintColor(int color){
         invalidate();
         currentColor = color;
         //paint.setColor(color);
-        path = new Path();
+        //path = new Path();
         //invalidate();
 //        if(currentEvent == SQUARE_EVENT){
 //            rectangle.setColor(color);
@@ -213,13 +227,49 @@ public class DrawIt extends View {
     public void setStroke(int stroke){
         invalidate();
         currentStrokeWidth = stroke;
-        path = new Path();
+        //path = new Path();
         //invalidate();
     }
 
     public void setEvent(int event){
         currentEvent = event;
     }
+
+
+    public Serializable getArrayColors (){
+        return (Serializable) colors;
+    }
+
+    public Serializable getArrayStrokes (){
+        return (Serializable) strokes;
+    }
+
+    public Serializable getArrayPaths (){
+        return (Serializable) paths;
+    }
+
+    public Serializable getArrayShapes (){
+        return (Serializable) rectangles;
+    }
+
+    public void setArrayColors (Serializable colors) {
+        this.colors = (ArrayList) colors;
+    }
+
+    public void setArrayStrokes (Serializable strokes) {
+        this.strokes = (ArrayList) strokes;
+    }
+
+    public void setArrayPaths(Serializable paths) {
+        this.paths = (ArrayList) paths;
+    }
+
+    public void setArrayShapes (Serializable shapes) {
+        Log.i("Rotation", "Setting up Shapes");
+        this.rectangles = (ArrayList) shapes;
+    }
+
+
 }
 
 class Rectangle {
@@ -233,7 +283,7 @@ class Rectangle {
     private float bottom;
     private int color;
     private int stroke;
-    private final int type;
+    private int type;
 
     Rectangle(float top, float left, int color, int type, int stroke){
         this.top = top;
