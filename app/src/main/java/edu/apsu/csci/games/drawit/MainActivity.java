@@ -3,6 +3,7 @@ package edu.apsu.csci.games.drawit;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -17,6 +18,7 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -26,7 +28,7 @@ public class MainActivity extends AppCompatActivity {
     private static final int PHOTO_INTENT = 1;
     private Uri imageUri;
     private SharedPreferences preferences;
-    private static final String DRAW_KEY = "dKey";
+    private static final String drawKey = "drawKey";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -138,13 +140,22 @@ public class MainActivity extends AppCompatActivity {
         });
 
         final Button save_button = findViewById(R.id.save_button);
-        findViewById(R.id.save_button).setOnClickListener(new View.OnClickListener() {
+        preferences = this.getSharedPreferences("prefID", Context.MODE_PRIVATE);
+        final DrawIt drawIt = findViewById(R.id.draw_canvas);
+
+
+        findViewById(R.id.save_button).setOnClickListener(new View.OnClickListener()  {
+
             @Override
             public void onClick(View v) {
-                preferences = getSharedPreferences("preferences", Context.MODE_PRIVATE);
-                SharedPreferences.Editor editor = preferences.edit();
-                editor.putString(DRAW_KEY, save_button.getText().toString()).commit();
+                String draw = drawIt.toString();
 
+                SharedPreferences.Editor editor = preferences.edit();
+
+                editor.putString(drawKey, draw);
+                editor.apply();
+                Toast.makeText(getApplicationContext(),"Your drawing was successfully saved",
+                        Toast.LENGTH_SHORT).show();
             }
         });
     }
