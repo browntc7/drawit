@@ -10,6 +10,7 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.PersistableBundle;
 import android.os.SystemClock;
+import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -34,6 +35,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        //load stored values from SharedPreferences
+        preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        String restoredContent = preferences.getString(drawKey, null);
 
         findViewById(R.id.choose_pic_btn).setOnClickListener(new View.OnClickListener() {
             @Override
