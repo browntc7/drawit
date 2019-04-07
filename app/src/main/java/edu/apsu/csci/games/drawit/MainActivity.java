@@ -28,17 +28,12 @@ public class MainActivity extends AppCompatActivity {
 
     private static final int PHOTO_INTENT = 1;
     private Uri imageUri;
-    private SharedPreferences preferences;
-    private static final String drawKey = "drawKey";
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        //load stored values from SharedPreferences
-        preferences = PreferenceManager.getDefaultSharedPreferences(this);
-        String restoredContent = preferences.getString(drawKey, null);
 
         findViewById(R.id.choose_pic_btn).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -144,21 +139,12 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        final Button save_button = findViewById(R.id.save_button);
-        preferences = this.getSharedPreferences("prefID", Context.MODE_PRIVATE);
-        final DrawIt drawIt = findViewById(R.id.draw_canvas);
-
 
         findViewById(R.id.save_button).setOnClickListener(new View.OnClickListener()  {
 
             @Override
             public void onClick(View v) {
-                String draw = drawIt.toString();
 
-                SharedPreferences.Editor editor = preferences.edit();
-
-                editor.putString(drawKey, draw);
-                editor.apply();
                 Toast.makeText(getApplicationContext(),"Your drawing was successfully saved",
                         Toast.LENGTH_SHORT).show();
             }
