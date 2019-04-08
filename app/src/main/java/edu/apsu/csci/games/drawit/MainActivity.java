@@ -2,15 +2,21 @@ package edu.apsu.csci.games.drawit;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.PaintDrawable;
+import android.media.MediaScannerConnection;
 import android.net.Uri;
+import android.os.Environment;
 import android.os.PersistableBundle;
 import android.os.SystemClock;
-import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -21,10 +27,16 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
+
+    DrawIt drawView;
 
     private static final int PHOTO_INTENT = 1;
     private Uri imageUri;
@@ -34,6 +46,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        drawView = (DrawIt) findViewById(R.id.draw_canvas);
 
         findViewById(R.id.choose_pic_btn).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -139,14 +152,69 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-
-        findViewById(R.id.save_button).setOnClickListener(new View.OnClickListener()  {
+        //thanks to stackoverflow user JRowan for canvas to bitmap save and storage instructions
+        //stackoverflow.com/questions/18676311/android-app-how-to-save-a-bitmap-drawing-on-canvas-as-image-check-code/18676403
+        findViewById(R.id.save_button).setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View v) {
+                File folder = new File(Environment.getExternalStorageDirectory().toString());
+                boolean success = false;
+                if (!folder.exists()) {
+                    success = folder.mkdirs();
+                }
 
-                Toast.makeText(getApplicationContext(),"Your drawing was successfully saved",
+                Toast.makeText(getApplicationContext(), "Folder found : " + success,
                         Toast.LENGTH_SHORT).show();
+                File file = new File(Environment.getExternalStorageDirectory().toString() + "/DrawIt.png");
+
+                if (!file.exists()) {
+                    try {
+                        success = file.createNewFile();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                Toast.makeText(getApplicationContext(), "Image saved in file '/DrawIt.png' : " + success,
+                        Toast.LENGTH_SHORT).show();
+
+
+                FileOutputStream ostream = null;
+                try {
+                    ostream = new FileOutputStream(file);
+
+                    System.out.println(ostream);
+
+                    DrawIt drawIt = findViewById(R.id.draw_canvas);
+
+                    Bitmap well = drawView.getBitmap();
+                    Bitmap save = Bitmap.createBitmap(320, 480, Bitmap.Config.ARGB_8888);
+                    Paint paint = new Paint();
+                    paint.setColor(Color.WHITE);
+                    Canvas now = new Canvas(save);
+                    now.drawRect(new Rect(0, 0, 320, 480), paint);
+                    now.drawBitmap(well, new Rect(0, 0, well.getWidth(), well.getHeight()), new Rect(0, 0, 320, 480), null);
+
+                    if (save == null) {
+                        Toast.makeText(getApplicationContext(), "NULL bitmap save\n",
+                                Toast.LENGTH_SHORT).show();
+                    }
+                    save.compress(Bitmap.CompressFormat.PNG, 100, ostream);
+
+
+                } catch (NullPointerException e) {
+                    e.printStackTrace();
+                    Toast.makeText(getApplicationContext(), "Null error", Toast.LENGTH_SHORT).show();
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                    Toast.makeText(getApplicationContext(), "File error", Toast.LENGTH_SHORT).show();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    Toast.makeText(getApplicationContext(), "IO error", Toast.LENGTH_SHORT).show();
+                }
+                // call DrawIt clear();
+                // can later implement MediaScannerConnection to show saved bitmap in gallery
             }
         });
     }

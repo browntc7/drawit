@@ -29,6 +29,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DrawIt extends View implements Serializable {
+    public Bitmap mBitmap;
+    public Canvas canvas;
+    private Paint mBitmapPaint;
+
 
     public static final int PENCIL_EVENT = 0;
     public static final int SQUARE_EVENT = 1;
@@ -56,6 +60,9 @@ public class DrawIt extends View implements Serializable {
 
     public DrawIt(Context context, AttributeSet attrs) {
         super(context, attrs);
+
+        path = new Path();
+        mBitmapPaint = new Paint(Paint.DITHER_FLAG);
         setup(attrs);
     }
 
@@ -83,6 +90,8 @@ public class DrawIt extends View implements Serializable {
             paint.setColor(colors.get(i));
             paint.setStrokeWidth(strokes.get(i));
             canvas.drawPath(paths.get(i), paint);
+            canvas.drawBitmap(mBitmap, 0, 0, mBitmapPaint);
+            canvas.drawPath(path, paint);
         }
 
         Log.i("Rect size", Integer.toString(rectangles.size()));
@@ -108,43 +117,66 @@ public class DrawIt extends View implements Serializable {
     @Override
     public boolean onTouchEvent(MotionEvent event) {
 
-            int action = event.getAction();
+        int action = event.getAction();
 
-            if(action == MotionEvent.ACTION_DOWN) {
-                if(currentEvent == PENCIL_EVENT) {
-                    path = new Path();
-                    path.moveTo(event.getX(), event.getY());
-                } else if (currentEvent == SQUARE_EVENT) {
-                    rectangle = new Rectangle(event.getY(), event.getX(), currentColor, Rectangle.RECTANGLE, currentStrokeWidth);
-                } else if (currentEvent == CIRCLE_EVENT){
-                    rectangle = new Rectangle(event.getY(), event.getX(), currentColor, Rectangle.CIRCLE, currentStrokeWidth);
-                }
-            } else if (action == MotionEvent.ACTION_MOVE){
-                if(currentEvent == PENCIL_EVENT) {
-                    path.lineTo(event.getX(), event.getY());
-                    invalidate();
-                } else  if (currentEvent == SQUARE_EVENT || currentEvent == CIRCLE_EVENT){
-                    Log.i("OnTouchEvent", "MOVE + Square/Circle");
-                    rectangle.setBottom(event.getY());
-                    rectangle.setRight(event.getX());
-                    invalidate();
-                }
-
-            } else if (action == MotionEvent.ACTION_UP){
-                if(currentEvent == PENCIL_EVENT) {
-                    paths.add(path);
-                } else if (currentEvent == SQUARE_EVENT || currentEvent == CIRCLE_EVENT){
-                    rectangles.add(rectangle);
-                }
-                colors.add(currentColor);
-                strokes.add(currentStrokeWidth);
-
+        if (action == MotionEvent.ACTION_DOWN) {
+            if (currentEvent == PENCIL_EVENT) {
+                path = new Path();
+                path.moveTo(event.getX(), event.getY());
+            } else if (currentEvent == SQUARE_EVENT) {
+                rectangle = new Rectangle(event.getY(), event.getX(), currentColor, Rectangle.RECTANGLE, currentStrokeWidth);
+            } else if (currentEvent == CIRCLE_EVENT) {
+                rectangle = new Rectangle(event.getY(), event.getX(), currentColor, Rectangle.CIRCLE, currentStrokeWidth);
+            }
+        } else if (action == MotionEvent.ACTION_MOVE) {
+            if (currentEvent == PENCIL_EVENT) {
+                path.lineTo(event.getX(), event.getY());
+                invalidate();
+            } else if (currentEvent == SQUARE_EVENT || currentEvent == CIRCLE_EVENT) {
+                Log.i("OnTouchEvent", "MOVE + Square/Circle");
+                rectangle.setBottom(event.getY());
+                rectangle.setRight(event.getX());
                 invalidate();
             }
-            return true;
+
+        } else if (action == MotionEvent.ACTION_UP) {
+            if (currentEvent == PENCIL_EVENT) {
+                paths.add(path);
+            } else if (currentEvent == SQUARE_EVENT || currentEvent == CIRCLE_EVENT) {
+                rectangles.add(rectangle);
+            }
+            colors.add(currentColor);
+            strokes.add(currentStrokeWidth);
+
+            invalidate();
+        }
+        return true;
 
     }
 
+    public Bitmap getBitmap()
+    {
+
+        this.setDrawingCacheEnabled(true);
+        this.buildDrawingCache();
+        Bitmap bmp = Bitmap.createBitmap(this.getDrawingCache());
+        this.setDrawingCacheEnabled(false);
+
+
+        return bmp;
+    }
+
+    public void clear(){
+
+        mBitmap.eraseColor(Color.BLACK);
+        mBitmap.eraseColor(Color.BLUE);
+        mBitmap.eraseColor(Color.GREEN);
+        mBitmap.eraseColor(Color.RED);
+        mBitmap.eraseColor(Color.WHITE);
+        mBitmap.eraseColor(Color.YELLOW);
+        invalidate();
+        System.gc(); //calling garbage collector avoids filling memory
+    }
     /**
         * From ShapeView.java created by Dr. John Nicholson, APSU on 3/9/16
         * Allows screen to rotate without affecting canvas.
@@ -153,6 +185,8 @@ public class DrawIt extends View implements Serializable {
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
+        mBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+        canvas = new Canvas(mBitmap);
         currentWidth = w;
         currentHeight = h;
     }
@@ -341,4 +375,5 @@ class Rectangle {
         return stroke;
     }
 }
+
 
