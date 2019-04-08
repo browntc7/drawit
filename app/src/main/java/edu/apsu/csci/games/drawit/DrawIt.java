@@ -157,26 +157,12 @@ public class DrawIt extends View implements Serializable {
     public Bitmap getBitmap()
     {
 
-        this.setDrawingCacheEnabled(true);
-        this.buildDrawingCache();
-        Bitmap bmp = Bitmap.createBitmap(this.getDrawingCache());
-        this.setDrawingCacheEnabled(false);
+        Bitmap bmp = Bitmap.createBitmap(this.mBitmap);
 
 
         return bmp;
     }
 
-    public void clear(){
-
-        mBitmap.eraseColor(Color.BLACK);
-        mBitmap.eraseColor(Color.BLUE);
-        mBitmap.eraseColor(Color.GREEN);
-        mBitmap.eraseColor(Color.RED);
-        mBitmap.eraseColor(Color.WHITE);
-        mBitmap.eraseColor(Color.YELLOW);
-        invalidate();
-        System.gc(); //calling garbage collector avoids filling memory
-    }
     /**
         * From ShapeView.java created by Dr. John Nicholson, APSU on 3/9/16
         * Allows screen to rotate without affecting canvas.
@@ -243,26 +229,14 @@ public class DrawIt extends View implements Serializable {
         invalidate();
     }
 
-    public void setImage (Drawable drawable){
-        setBackground(drawable);
-    }
-
-    public void setPaintColor(int color){
+    public void setPaintColor(int color) {
         invalidate();
         currentColor = color;
-        //paint.setColor(color);
-        //path = new Path();
-        //invalidate();
-//        if(currentEvent == SQUARE_EVENT){
-//            rectangle.setColor(color);
-//        }
     }
 
     public void setStroke(int stroke){
         invalidate();
         currentStrokeWidth = stroke;
-        //path = new Path();
-        //invalidate();
     }
 
     public void setEvent(int event){

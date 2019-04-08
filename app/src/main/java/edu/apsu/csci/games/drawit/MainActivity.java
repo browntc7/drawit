@@ -1,9 +1,19 @@
+/*Tyler Brown & Charity Edmonds
+* CSCI 4020 A3
+* Min SDK 22, Tested on Kindle Fire 8 & Android Emulator
+* Minimum requirements plus
+* 1) Circles
+* 2) Shapes of multiple strokes
+* */
 package edu.apsu.csci.games.drawit;
 
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
+import android.graphics.Path;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -37,7 +47,6 @@ import java.util.ArrayList;
 public class MainActivity extends AppCompatActivity {
 
     DrawIt drawView;
-
     private static final int PHOTO_INTENT = 1;
     private Uri imageUri;
 
@@ -164,8 +173,6 @@ public class MainActivity extends AppCompatActivity {
                     success = folder.mkdirs();
                 }
 
-                Toast.makeText(getApplicationContext(), "Folder found : " + success,
-                        Toast.LENGTH_SHORT).show();
                 File file = new File(Environment.getExternalStorageDirectory().toString() + "/DrawIt.png");
 
                 if (!file.exists()) {
@@ -176,8 +183,9 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
 
-                Toast.makeText(getApplicationContext(), "Image saved in file '/DrawIt.png' : " + success,
+                Toast.makeText(getApplicationContext(), "Image saved in file '/DrawIt.png'  " ,
                         Toast.LENGTH_SHORT).show();
+
 
 
                 FileOutputStream ostream = null;
@@ -201,23 +209,20 @@ public class MainActivity extends AppCompatActivity {
                                 Toast.LENGTH_SHORT).show();
                     }
                     save.compress(Bitmap.CompressFormat.PNG, 100, ostream);
-
-
+                    //now.drawColor(Color.TRANSPARENT, PorterDuff.Mode.MULTIPLY); ****clear after save****
                 } catch (NullPointerException e) {
                     e.printStackTrace();
                     Toast.makeText(getApplicationContext(), "Null error", Toast.LENGTH_SHORT).show();
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
                     Toast.makeText(getApplicationContext(), "File error", Toast.LENGTH_SHORT).show();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    Toast.makeText(getApplicationContext(), "IO error", Toast.LENGTH_SHORT).show();
                 }
-                // call DrawIt clear();
+
                 // can later implement MediaScannerConnection to show saved bitmap in gallery
             }
         });
     }
+
 
     private void setColorListener(View v){
         DrawIt drawit = findViewById(R.id.draw_canvas);
